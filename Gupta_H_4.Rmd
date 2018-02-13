@@ -1,0 +1,239 @@
+---
+title: 'DA5020 Homework 4: Strings and Factors'
+output:
+  word_document: default
+  pdf_document: default
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  # mute messages output
+  message = FALSE)
+```
+
+## Preparation
+
+Download US [Farmers Markert Directory](https://www.ams.usda.gov/local-food-directories/farmersmarkets) data from the website of USDA (click on "Export to Excel"). Rename the file as _farmers_market.csv_.
+
+Download the [Know Your Farmer, Know Your Food Projects](https://catalog.data.gov/dataset/know-your-farmer-know-your-food-projects) dataset and name it as _kyfprojects.xls_. Put it into the same folder.
+
+
+```{r, eval = FALSE}
+```
+
+Read the data:
+
+```{r}
+library(tidyverse)
+library(readxl)
+
+
+farmers_market<-read_csv("farmers_market.csv")
+kyfp<-read_excel("kyfprojects.xls")
+
+
+```
+
+## Warm Up
+
+This dataset stores city and state in different columns, what if you want to
+print out city and state in the format "City, State"?
+
+```{r}
+# Combine city and state separated by ,
+farmers_market <- read_csv("farmers_market.csv")
+farmers_market$Combined = paste(farmers_market$city, farmers_market$State, sep=", ")
+```
+
+## Questions
+
+Please edit this file and add your own solutions to these questions.
+Make your output as readable as possible. Next time you would need to create this file on your own. Feel free to try out other templates (e.g. [Tufte Handout](http://rstudio.github.io/tufte/)) if your are familiar with LaTex. But for whatever template you choose, you should always include a link to your GitHub repo at the first page of your PDF.
+
+1. (20 points) Cleanup the `Facebook` and `Twitter` column to let them contain only the facebook username or twitter handle name. I.e., replace "https://www.facebook.com/pages/Cameron-Park-Farmers-Market/97634216535?ref=hl" with "Cameron-Park-Farmers-Market", "https://twitter.com/FarmMarket125th" with "FarmMarket125th", and "\@21acres" with "21acres".
+
+```{r}
+#Select the data
+farmers_market <- read_csv("Farmers_market.csv")
+farmers_fb <- select(farmers_market,Facebook)
+farmers_to_vector <- as_vector(farmers_fb)
+df<-data_frame(facebook = character())
+
+# Clean up the Facebook column using if-else statements
+for(i in 1:NROW(farmers_to_vector))
+{
+  x = farmers_to_vector[[i]]
+  a = 'https:[/][/]www.facebook.com[/]pages[/]'
+  b = 'https:[/][/]www.facebook.com[/]'
+  c = 'www.facebook.com[/]pages[/]'
+  d = 'www.facebook.com[/]'
+  e = 'facebook.com[/]'
+  f = 'http:[/][/]www.'
+  g = 'www.'
+  h = 'https:[/][/]'
+  j = 'http:[/][/]'
+  t1 = if (grepl(a,x)==TRUE){gsub(a,"",x)}
+  else if(grepl(b,x)==TRUE){gsub(b, "", x)}
+  else if(grepl(c,x)==TRUE){gsub(c, "", x)}
+  else if(grepl(d,x)==TRUE){gsub(d, "", x)}
+  else if(grepl(e,x)==TRUE){gsub(e, "", x)}
+  else if(grepl(f,x)==TRUE){gsub(f, "", x)}
+  else if(grepl(g,x)==TRUE){gsub(g, "", x)}
+  else if(grepl(h,x)==TRUE){gsub(h, "", x)}
+  else if(grepl(j,x)==TRUE){gsub(j, "", x)}
+  else {x}
+  df[i, ] = t1}
+
+# To remove the unwanted numbers from the facebook name at the end
+df_test <- gsub("/.*","",as.character(df$facebook))
+output_facebook <- data_frame(df_test)
+
+# To Cleanup Twitter
+farmers_market_tw <- select(farmers_market,Twitter)
+farmers_market_to_vector <- as_vector(farmers_market_tw)
+# create dataframe for twitter column
+df_T <- data_frame(twitter = character())
+
+for(i in 1:NROW(farmers_market_to_vector))
+{
+  x= farmers_market_to_vector[[i]]
+  p = 'https:[/][/]twitter.com[/]'
+  q = 'https:[/][/]www.twitter.com[/]'
+  r = '@'
+  s = 'www.twitter.com'
+  t2 = if (grepl(p,x) == TRUE){gsub(p,"",x)}
+  else if(grepl(q,x) == TRUE){gsub(q,"",x)}
+  else if(grepl(r,x) == TRUE){gsub(r,"",x)}
+  else {x}
+  df_T[i, ] = t2}
+
+output_twitter <- df_T
+
+#outputs of the question 1
+output_facebook
+output_twitter
+```
+
+2. (20 points) Clean up the `city` and `street` column. Remove state and county names from the `city` column and consolidate address spellings to be more consistent (e.g. "St.", "ST.", "Street" all become "St"; "and" changes to "&", etc...).
+
+```{r}
+farmers_market_Q2 <- read_csv("farmers_market.csv")
+farmers_market_Q2$city <- gsub(" and "," & ",as.character(farmers_market_Q2$city),fixed= TRUE)
+# To remove the state name from the city column
+farmers_market_Q2$city <- gsub(",.*","",as.character(farmers_market_Q2$city),fixed= FALSE)
+# to conslidate address spelling in the street names
+farmers_market_Q2$street<-gsub(" Street"," St",as.character(farmers_market_Q2$street),fixed = TRUE)
+farmers_market_Q2$street<-gsub(" and "," & ",as.character(farmers_market_Q2$street),fixed= TRUE)
+farmers_market_Q2$street<-gsub(" street"," St",as.character(farmers_market_Q2$street),fixed = TRUE)
+farmers_market_Q2$street<-gsub(" street "," St",as.character(farmers_market_Q2$street),fixed = TRUE)
+farmers_market_Q2$street<-gsub(" St."," St",as.character(farmers_market_Q2$street),fixed= TRUE)
+farmers_market_Q2$street<-gsub(" ST."," St",as.character(farmers_market_Q2$street),fixed = TRUE)
+farmers_market_Q2$street<-gsub(" Sts."," St",as.character(farmers_market_Q2$street),fixed= TRUE)
+farmers_market_Q2$street<-gsub(" Sts"," St",as.character(farmers_market_Q2$street),fixed = TRUE)
+farmers_market_Q2$street<-gsub("ave."," Ave",as.character(farmers_market_Q2$street),fixed= TRUE)
+farmers_market_Q2$street<-gsub(" Avenue "," Ave",as.character(farmers_market_Q2$street),fixed = TRUE)
+farmers_market_Q2$street<-gsub(" Avenue"," Ave",as.character(farmers_market_Q2$street),fixed = TRUE)
+farmers_market_Q2$street<-gsub(" Ave"," Ave",as.character(farmers_market_Q2$street),fixed= TRUE)
+farmers_market_Q2$street<-gsub(" Ave."," Ave",as.character(farmers_market_Q2$street),fixed= TRUE)
+farmers_market_Q2$street<-gsub(" Boulevard"," Blvd",as.character(farmers_market_Q2$street),fixed= TRUE)
+#output of the question 2
+farmers_market_Q2
+```
+
+3. (20 points) Create a new data frame (tibble) that explains the online presence of each state's farmers market. I.e., how many percentages of them have a facebook account? A twitter account? Or either of the accounts? (Hint: use the `is.na()` function)
+
+```{r}
+library("tibble")
+# create a table with online presense for farmers market. 
+# if a market has facebook profile or have any other online presense it will be summarised in the table
+tibble_table <- read_csv("farmers_market.csv") %>%
+  group_by(State) %>%
+  summarise( Facebook = ((sum(!is.na(Facebook)))/ n())*100, #summarize the accounts with facebook id
+             twitter = ((sum(!is.na(Twitter)))/ n())*100,
+             Youtube = ((sum(!is.na(Youtube)))/n())*100,
+             Other_media = ((sum(!is.na(OtherMedia)))/n())*100,
+             Website = ((sum(!is.na(Website)))/n())*100)
+tibble_table <- as_data_frame(tibble_table)
+class(tibble_table)
+#output of the question 3
+output_3 <- tibble_table
+output_3
+```
+
+4. (20 points) 
+    
+Make the location types shorter using the forcats::fct_recode function. Create a plot that demonstrates the number of farmers markets per location type. The locations should be ordered in descending order where the top of the graph will have the one with the highest number of markets 
+
+```{r}
+
+farmers_market_Q4 <- read_csv("farmers_market.csv") 
+
+# Check unique values of Location types
+Unique_location <- distinct(select(farmers_market_Q4,Location))
+Unique_location_vector <- as_vector(Unique_location)
+Unique_location_vector
+
+# Using forcats recode function to shorten the location 
+location_vector_2 <- as_vector(select(farmers_market_Q4, Location))
+
+akl <- recode_factor(location_vector_2, `Faith-based institution (e.g., church, mosque, synagogue, temple)` = "Faith-based institution", `On a farm from: a barn, a greenhouse, a tent, a stand, etc` = "On a farm", `Co-located with wholesale market facility` = "wholesale market facility")
+akl <- as_data_frame(akl)
+akl
+
+plot_data <- farmers_market_Q4 %>%
+  group_by(Location) %>%
+  summarise(count = n()) %>%
+  as_tibble() %>%
+  mutate(Newname = recode_factor(Location, `Faith-based institution (e.g., church, mosque, synagogue, temple)` = "Faith-based institution", `On a farm from: a barn, a greenhouse, a tent, a stand, etc` = "On a farm", `Co-located with wholesale market facility` = "wholesale market facility"))
+ggplot(data = plot_data, mapping = aes(y = reorder(Newname, count) , x = count) )+
+  geom_point() + labs(x = "Number of farmer's market") + labs(y = "Location") 
+```
+
+5. (20 points) Write code to sanity check the `kyfprojects` data. For example, does `Program Abbreviation` always match `Program Name` for all the rows? (Try thinking of your own rules, too.)
+
+
+```{r}
+
+kyfp <- read_excel("kyfprojects.xls")
+
+# Sanity check 1 - Check if states name are valid 
+as_data_frame(unique(kyfp$State)) 
+
+# Sanity check 2 - Check if year is between 2009 and 2012
+year <- grepl("(20[09]\\d|20[12]\\d)", kyfp$Year)
+sum(year)
+table(year)["TRUE"]
+
+# Sanity check 3 - Check recipient type 
+Unique_recipient <- distinct(select(kyfp,'Recipient Type'))
+Unique_recipient
+
+# Sanity check 4 - Check Funding type 
+Unique_funding <- distinct(select(kyfp,'Funding Type'))
+Unique_funding
+
+# Sanity check 5 - Check Funding amount
+maxcheck <- as.numeric(kyfp$'Funding Amount ($)')
+maxcheck2 <- na.omit(maxcheck)  
+  max(maxcheck2)
+  
+# Sanity check 6 - Check Zipcodeis only digits
+zip <- select(kyfp,Zip)
+check <- grepl("^[0-9]+$", zip)
+check  
+
+# Sanity check 7 - State characters is limited to 2 characters 
+check_num <- nchar(kyfp$State)
+sum(check_num/2)
+table(check_num)["2"]
+
+# Sanity check 8 - To Check if town is characters 
+town <- grepl("[A-z]",kyfp$Town)
+town
+  
+```
+
+
+## Submission
+You need to submit an .Rmd extension file as well as the generated pdf file. Be sure to state all the assumptions and give explanations as comments in the .Rmd file wherever needed to help us assess your submission. Please name the submission file LAST_FirstInitial_1.Rmd for example for John Smith's 1st assignment, the file should be named Smith_J_1.Rmd. 
